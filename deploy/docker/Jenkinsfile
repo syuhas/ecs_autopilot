@@ -25,7 +25,7 @@ pipeline {
 
                         ls -la application_files
                         cp -r application_files/* .
-                        cp -r application_files/deploy/docker/* deploy/docker/
+                        cp -r application_files/deploy/docker/. deploy/docker/
 
                         pwd
                         echo "Checking the base directory"
