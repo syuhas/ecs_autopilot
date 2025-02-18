@@ -6,6 +6,7 @@ from loguru import logger
 
 # list all subdomains ending in domain 'digitalsteve.net' for all accounts in the list
 workspace = os.environ['WORKSPACE']
+jenkins_home = os.environ['JENKINS_HOME']
 file_path = os.path.join(workspace, 'subdomains.json')
 # add role name here. role should have the same name in all accounts and should have the same permissions
 cross_account_role = 'jenkinsAdminXacnt'
@@ -66,9 +67,10 @@ with open(file_path, 'w') as f:
 
 print(f"Subdomains saved to: {file_path}")
     
-# now move the file to /home/jenkins_home/github
+# make the github directory if it doesnt exist
+os.makedirs(f'{jenkins_home}/github', exist_ok=True)
 
-with open('/home/jenkins_home/github/subdomains.json', 'w') as f:
+with open(f'{jenkins_home}/github/subdomains.json', 'w') as f:
     json.dump(subdomains, f)
     
 print(f"Subdomains saved to: /home/jenkins_home/github/subdomains.json")
