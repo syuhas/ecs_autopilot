@@ -1,4 +1,4 @@
-job('test_fetch_subdomains') {
+job('fetch_subdomains') {
     description('Freestyle job to fetch existing subdomains in selected AWS accounts.')
 
     // Restrict the job to run only on the built-in node
