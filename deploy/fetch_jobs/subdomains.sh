@@ -4,7 +4,7 @@ set -x
 
 
 
-cd deploy
+cd deploy/fetch_jobs
 sudo apt install python3-venv -y
 python3 -m venv venv
 
