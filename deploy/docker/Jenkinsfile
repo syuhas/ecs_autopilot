@@ -28,6 +28,8 @@ pipeline {
                         sudo cp -r application_files/deploy/docker/. deploy/docker/
                         sudo cp -r application_files/deploy/scripts/. deploy/scripts/
                         sudo chown -R ec2-user:ec2-user .
+                        ls -lah
+
                     """
                 }
             }
