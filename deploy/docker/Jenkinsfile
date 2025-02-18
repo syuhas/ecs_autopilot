@@ -236,6 +236,8 @@ pipeline {
                             if (pythonScripts.length > 0) {
                                 echo "Running python scripts"
                                 for (script in pythonScripts) {
+                                    sh "sudo dnf install python3 -y"
+                                    sh "sudo dnf install python3-pip -y"
                                     sh "python3 -m venv venv"
                                     sh "source venv/bin/activate"
                                     sh "pip install -U pip"
