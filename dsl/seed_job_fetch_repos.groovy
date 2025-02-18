@@ -14,10 +14,10 @@ job('fetch_repos') {
         }
     }
 
-    // Build Triggers - Only runs when deploy-repos is built
-    // triggers {
-    //     upstream('deploy-repos', 'SUCCESS')
-    // }
+    Build Triggers - Only runs when deploy-repos is built
+    triggers {
+        upstream('deploy-repos', 'SUCCESS')
+    }
 
     // Inject Environment Variables using CloudBees Credentials Plugin
     wrappers {
