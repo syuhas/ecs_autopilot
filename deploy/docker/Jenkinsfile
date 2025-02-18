@@ -9,7 +9,8 @@ pipeline {
         IMAGE_TAG = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         // APP_NAME = "${ params.ApplicationName }"
         // knock the last ']' off the end of the string
-        REPOSITORY = "${ params.Repository.split(',')[1].length() - 1 }"
+        REPOSITORY = "${ params.Repository.split(',')[1].substring(0, params.Repository.split(',')[1].length() - 1) }"
+        // REPOSITORY = "${ params.Repository.split(',')[1].length() - 1 }"
         BRANCH = "${ params.Branch }"
     }
 
