@@ -17,8 +17,8 @@ pipeline {
             steps {
                 script {
                     sh """
-                        repo = ${REPOSITORY.tokenize(',')[1].trim().replace(']', '').trim()}
-                        echo "Repository: ${repo}"
+                        $REPO = ${REPOSITORY.tokenize(',')[1].trim().replace(']', '').trim()}
+                        echo "Repository: ${REPO}"
                         // echo "Branch: ${BRANCH}"
                     """
                     // sh """
