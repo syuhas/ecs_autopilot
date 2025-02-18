@@ -1,4 +1,4 @@
-job('test_fetch_github_repos') {
+job('fetch_repos') {
     description('Freestyle job to fetch GitHub repos and list branches.')
 
     // Restrict the job to run only on the built-in node

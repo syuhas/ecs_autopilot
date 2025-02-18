@@ -66,3 +66,9 @@ with open(file_path, 'w') as f:
 
 print(f"Subdomains saved to: {file_path}")
     
+# now move the file to /home/jenkins_home/github
+
+with open('/home/jenkins_home/github/subdomains.json', 'w') as f:
+    json.dump(subdomains, f)
+    
+print(f"Subdomains saved to: /home/jenkins_home/github/subdomains.json")
