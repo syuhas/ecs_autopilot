@@ -17,20 +17,24 @@ pipeline {
             steps {
                 script {
                     sh """
-                        rm -r application_files && mkdir application_files
-                        git clone -b ${BRANCH} ${REPOSITORY} application_files
-
-                        ls -la application_files
-                        cp -r application_files/* .
-                        cp -r application_files/deploy/docker/* deploy/docker/
-
-                        pwd
-                        ls -la
-                        echo
-                        ls -la deploy/docker
-                        ls -la deploy
-                        ls -la deploy/scripts
+                        echo "Cloning repository: ${REPOSITORY}"
+                        echo "Branch: ${BRANCH}"
                     """
+                    // sh """
+                    //     rm -r application_files && mkdir application_files
+                    //     git clone -b ${BRANCH} ${REPOSITORY} application_files
+
+                    //     ls -la application_files
+                    //     cp -r application_files/* .
+                    //     cp -r application_files/deploy/docker/* deploy/docker/
+
+                    //     pwd
+                    //     ls -la
+                    //     echo
+                    //     ls -la deploy/docker
+                    //     ls -la deploy
+                    //     ls -la deploy/scripts
+                    // """
                 }
             }
         }
