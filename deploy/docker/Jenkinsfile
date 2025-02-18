@@ -24,10 +24,13 @@ pipeline {
                         cp -r application_files/deploy/docker/* deploy/docker/
 
                         pwd
+                        echo "Checking the base directory"
                         ls -la
-                        echo
-                        ls -la deploy/docker
+                        echo "Checking the deploy directory"
                         ls -la deploy
+                        echo "Checking the deploy/docker directory"
+                        ls -la deploy/docker
+                        echo "Checking the deploy/scripts directory"
                         ls -la deploy/scripts
                     """
                 }
