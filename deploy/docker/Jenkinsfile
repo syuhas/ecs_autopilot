@@ -17,8 +17,9 @@ pipeline {
             steps {
                 script {
                     sh """
-                        REPOSITORY = ${REPOSITORY.split(',')[1]}
-                        echo "Branch: ${BRANCH}"
+                        repo = ${REPOSITORY.split(',')[1]}
+                        echo "Repository: ${repo}"
+                        // echo "Branch: ${BRANCH}"
                     """
                     // sh """
                     //     rm -r application_files && mkdir application_files
