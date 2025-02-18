@@ -49,6 +49,6 @@ echo "}" >> "$BRANCHES_LIST_FILE"
 
 echo "Branches saved to $BRANCHES_LIST_FILE"
 
-mkdir -p "/home/jenkins_home/github
+mkdir -p "/home/jenkins_home/github"
 cp -p "$WORKSPACE/$BRANCHES_LIST_FILE" "$JENKINS_HOME/github/github_branches.json"
 
