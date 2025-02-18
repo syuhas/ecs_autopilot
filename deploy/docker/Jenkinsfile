@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        echo "Cloning repository: ${REPOSITORY}"
+                        echo "Cloning repository: ${REPOSITORY[1]}"
                         echo "Branch: ${BRANCH}"
                     """
                     // sh """
