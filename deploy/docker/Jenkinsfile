@@ -7,7 +7,7 @@ pipeline {
     environment {
         AWS_ACCOUNT_ID = "${ params.Account }"
         IMAGE_TAG = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-        APP_NAME = "${ params.ApplicationName }"
+        // APP_NAME = "${ params.ApplicationName }"
         REPOSITORY = "${ params.Repository }"
         BRANCH = "${ params.Branch }"
     }
@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        mkdir 'application_files'
+                        rm -rF application_files && mkdir application_files
                         git clone -b ${BRANCH} ${REPOSITORY} application_files
 
                         ls -la application_files
@@ -26,6 +26,10 @@ pipeline {
 
                         pwd
                         ls -la
+                        echo
+                        ls -la deploy/docker
+                        ls -la deploy
+                        ls -la deploy/scripts
                     """
                 }
             }
