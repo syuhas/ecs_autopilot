@@ -216,17 +216,29 @@ pipeline {
                 script {
                     try {
                         dir('deploy/scripts') {
-                            if (fileExists('*.sh')) {
+                            // Find all .sh files
+                            def bashScripts = findFiles(glob: '*.sh')
+                            if (bashScripts.length > 0) {
                                 echo "Running bash scripts"
                                 sh 'chmod +x *.sh'
-                                sh './*.sh'
+                                for (script in bashScripts) {
+                                    sh "./${script.name}"
+                                }
                             } else {
                                 echo "No bash scripts found"
                             }
 
-                            if (fileExists('*.py')) {
+                            // Find all .py files
+                            def pythonScripts = findFiles(glob: '*.py')
+                            if (pythonScripts.length > 0) {
                                 echo "Running python scripts"
-                                sh 'python3 ./*.py'
+                                for (script in pythonScripts) {
+                                    sh "python3 -m venv venv"
+                                    sh "source venv/bin/activate"
+                                    sh "pip install -U pip"
+                                    sh "pip install -r requirements.txt"
+                                    sh "python3 ./${script.name}"
+                                }
                             } else {
                                 echo "No python scripts found"
                             }
@@ -234,6 +246,7 @@ pipeline {
                     } catch (Exception e) {
                         echo "Application scripts failed or no scripts found: ${e}"
                         echo "Exiting due to application scripts failure"
+                        error "Script execution failed"
                     }
                 }
             }
