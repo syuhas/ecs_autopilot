@@ -24,8 +24,8 @@ pipeline {
                         fi
 
                         ls -la application_files
-                        cp -r application_files/.[!.]* application_files/* .
-                        cp -r application_files/deploy/docker/. deploy/docker/
+                        sudo cp -r application_files/.[!.]* application_files/* .
+                        sudo cp -r application_files/deploy/docker/. deploy/docker/
                     """
                 }
             }
