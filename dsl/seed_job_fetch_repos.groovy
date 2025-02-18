@@ -1,21 +1,37 @@
-job('test_fetch_repos') {
-    description('Fetches repositories from GitHub and lists branches')
-    // Enter your own Github user and token parameters
-    parameters {
-        stringParam('GITHUB_USER', 'syuhas', 'GitHub organization or user from which to fetch repositories')
+job('test_fetch_github_repos') {
+    description('Freestyle job to fetch GitHub repos and list branches.')
+
+    // Restrict the job to run only on the built-in node
+    label('built-in')
+
+    // Source Code Management (SCM) - Git
+    scm {
+        git {
+            remote {
+                url('https://github.com/syuhas/ecs_deployer.git')
+            }
+            branch('*/main')
+        }
     }
 
-    environmentVariables {
-        env('TOKEN', credentials('GITHUB_TOKEN'))
+    // Build Triggers - Only runs when deploy-repos is built
+    // triggers {
+    //     upstream('deploy-repos', 'SUCCESS')
+    // }
+
+    // Inject Environment Variables using CloudBees Credentials Plugin
+    wrappers {
+        credentialsBinding {
+            string('TOKEN', 'GITHUB_TOKEN')  // Replace with actual credential ID
+        }
     }
 
+    // Build Steps - Run the shell script
     steps {
         shell('''
             #!/bin/bash
-
-            chmod +x deploy/fetch_jobs/subdomains.sh
-
-            ./deploy/fetch_jobs/subdomains.sh
+            chmod +x deploy/fetch_jobs/repos.sh
+            ./deploy/fetch_jobs/repos.sh
         ''')
     }
 }
