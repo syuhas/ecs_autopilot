@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        rm -rF application_files && mkdir application_files
+                        rm -r application_files && mkdir application_files
                         git clone -b ${BRANCH} ${REPOSITORY} application_files
 
                         ls -la application_files
