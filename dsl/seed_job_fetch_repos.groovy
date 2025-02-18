@@ -14,7 +14,7 @@ job('fetch_repos') {
         }
     }
 
-    Build Triggers - Only runs when deploy-repos is built
+    // Build Triggers - Only runs when deploy-repos is built
     triggers {
         upstream('deploy-repos', 'SUCCESS')
     }
