@@ -18,7 +18,6 @@ pipeline {
                     sh """
                         rm -r application_files && mkdir application_files
                         git clone -b ${BRANCH} ${REPOSITORY} application_files
-                        // throw a message that says "please have the deploy directory in the root of the application with a config.yaml file present"
                         if [ ! -d "application_files/deploy" ]; then
                             echo "Please have the deploy directory in the root of the application with a config.yaml file present"
                             exit 1
