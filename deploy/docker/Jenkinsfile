@@ -23,9 +23,7 @@ pipeline {
                             exit 1
                         fi
 
-                        ls -la application_files
-                        cp -r application_files/* .
-                        cp -r application_files/deploy/docker/. deploy/docker/
+                        tar cvf - . | (cd ..; tar xvf -)
 
                         pwd
                         echo "Checking the base directory"
