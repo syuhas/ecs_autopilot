@@ -8,7 +8,7 @@ pipeline {
         AWS_ACCOUNT_ID = "${ params.Account }"
         IMAGE_TAG = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         // APP_NAME = "${ params.ApplicationName }"
-        REPOSITORY = "${ params.Repository.split(',')[1] }"
+        REPOSITORY = "${ params.Repository.split(',')[1].trim() }"
         BRANCH = "${ params.Branch }"
     }
 
