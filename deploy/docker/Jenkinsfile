@@ -26,81 +26,108 @@ pipeline {
                         ls -la application_files
                         cp -r application_files/.[!.]* application_files/* .
                         cp -r application_files/deploy/docker/. deploy/docker/
-
-                        pwd
-                        echo "Checking the base directory"
-                        ls -la
-                        echo "Checking the deploy directory"
-                        ls -la deploy
-                        echo "Checking the deploy/docker directory"
-                        ls -la deploy/docker
-                        echo "Checking the deploy/scripts directory"
-                        ls -la deploy/scripts
                     """
                 }
             }
         }
 
-        // stage('Terraform Backend') {
+        stage('Terraform Backend') {
+            steps {
+                script {
+                        terraformInit = {
+                            sh """
+                                terraform init -reconfigure \
+                                    -backend-config="bucket=${env.TF_BUCKET}" \
+                                    -backend-config="key=${env.TF_VAR_aws_subdomain}.${env.TF_VAR_aws_domain}/terraform.tfstate" \
+                                    -backend-config="region=${env.TF_VAR_aws_region}" \
+                                    -backend-config="dynamodb_table=${env.TF_TABLE}"
+                            """
+                        }
+                }
+            }
+        }
+
+        stage('Set Environment Variables') {
+            steps {
+                echo "Account ID: ${AWS_ACCOUNT_ID}"
+                echo "Setting Environment Variables"
+                sh 'ls -la deploy/docker'
+                script {
+                    config = readYaml file: 'deploy/docker/config.yaml'
+                    accountConfig = config["aws_accounts"]["${AWS_ACCOUNT_ID}"]
+                    env.TF_VAR_app_name = config.app_name
+                    env.TF_VAR_aws_account_id = AWS_ACCOUNT_ID
+                    env.TF_VAR_aws_region = config.region
+                    env.TF_VAR_aws_security_group = accountConfig.security_group
+                    env.TF_VAR_aws_subnet_ids = groovy.json.JsonOutput.toJson(accountConfig.subnet_ids)
+                    env.TF_VAR_aws_vpc_id = accountConfig.vpc_id
+                    env.TF_BUCKET = accountConfig.tf_bucket
+                    env.TF_TABLE = accountConfig.tf_table
+                    env.TF_VAR_aws_ssl_certificate_arn = accountConfig.ssl_certificate_arn
+                    env.TF_VAR_aws_route53_zone_id = accountConfig.route53_zone_id
+                    env.TF_VAR_aws_domain = accountConfig.domain
+                    env.TF_VAR_aws_subdomain = "${ params.Subdomain }"
+                    env.TF_VAR_aws_ecr_image_tag = IMAGE_TAG
+                    env.XACNT_ROLE = accountConfig.cross_account_role
+                    env.TF_VAR_execution_role = accountConfig.execution_role
+                    env.TF_VAR_task_role = accountConfig.task_role
+                }
+                echo "Environment Variables Set"
+
+                script {
+                    dir('deploy/docker') {
+                        try {
+                            terraformInit()
+                            sh 'terraform state show aws_ecr_repository.ecr'
+                            sh 'terraform output -raw ecr_repository_url'
+                            env.ECR_REPOSITORY_URL = sh(script: 'terraform output -raw ecr_repository_url', returnStdout: true).trim()
+                        } catch (Exception e) {
+                            echo "ECR Repository not yet created, skipping..."
+                        }
+                    }
+                }
+
+                script {
+                    echo "App Name: ${env.TF_VAR_app_name}"
+                    echo "Account ID: ${env.TF_VAR_aws_account_id}"
+                    echo "AWS Region: ${env.TF_VAR_aws_region}"
+                    echo "Security Group: ${env.TF_VAR_aws_security_group}"
+                    echo "Subnet IDs: ${env.TF_VAR_aws_subnet_ids}"
+                    echo "VPC ID: ${env.TF_VAR_aws_vpc_id}"
+                    echo "Terraform Bucket: ${env.TF_BUCKET}"
+                    echo "Terraform Table: ${env.TF_TABLE}"
+                    echo "SSL Certificate ARN: ${env.TF_VAR_aws_ssl_certificate_arn}"
+                    echo "Route53 Zone ID: ${env.TF_VAR_aws_route53_zone_id}"
+                    echo "Domain: ${env.TF_VAR_aws_domain}"
+                    echo "Subdomain: ${env.TF_VAR_aws_subdomain}"
+                    echo "Image Tag: ${env.TF_VAR_aws_ecr_image_tag}"
+                    echo "Cross Account Role: ${env.XACNT_ROLE}"
+                    echo "Execution Role: ${env.TF_VAR_execution_role}"
+                    echo "Task Role: ${env.TF_VAR_task_role}"
+                    echo "ECR Repository URL: ${env.ECR_REPOSITORY_URL ?: 'ECR Repository not yet created'}"
+                }
+            }
+        }
+
+        stage('AssumeRole') {
+            steps {
+                script {
+                    def assumeRoleCmd = """
+                        aws sts assume-role --role-arn arn:aws:iam::${env.TF_VAR_aws_account_id}:role/${XACNT_ROLE} --role-session-name CrossAccountSession
+                    """
+                    def assumeRoleOutput = sh(script: assumeRoleCmd, returnStdout: true).trim()
+                    def creds = readJSON(text: assumeRoleOutput).Credentials
+
+                    env.AWS_ACCESS_KEY_ID = creds.AccessKeyId
+                    env.AWS_SECRET_ACCESS_KEY = creds.SecretAccessKey
+                    env.AWS_SESSION_TOKEN = creds.SessionToken
+                }
+            }
+        }
+
+        // stage('Test Environment Variables') {
         //     steps {
         //         script {
-        //                 terraformInit = {
-        //                     sh """
-        //                         terraform init -reconfigure \
-        //                             -backend-config="bucket=${env.TF_BUCKET}" \
-        //                             -backend-config="key=${env.TF_VAR_aws_subdomain}.${env.TF_VAR_aws_domain}/terraform.tfstate" \
-        //                             -backend-config="region=${env.TF_VAR_aws_region}" \
-        //                             -backend-config="dynamodb_table=${env.TF_TABLE}"
-        //                     """
-        //                 }
-        //         }
-        //     }
-        // }
-
-        // stage('Set Environment Variables') {
-        //     steps {
-        //         echo "Account ID: ${AWS_ACCOUNT_ID}"
-        //         echo "Setting Environment Variables"
-        //         sh 'ls -la deploy/docker'
-        //         script {
-        //             config = readYaml file: 'deploy/docker/config.yaml'
-        //             accountConfig = config["aws_accounts"]["${AWS_ACCOUNT_ID}"]
-        //             env.TF_VAR_app_name = config.app_name
-        //             env.TF_VAR_aws_account_id = AWS_ACCOUNT_ID
-        //             env.TF_VAR_aws_region = config.region
-        //             env.TF_VAR_aws_security_group = accountConfig.security_group
-        //             env.TF_VAR_aws_subnet_ids = groovy.json.JsonOutput.toJson(accountConfig.subnet_ids)
-        //             env.TF_VAR_aws_vpc_id = accountConfig.vpc_id
-        //             env.TF_BUCKET = accountConfig.tf_bucket
-        //             env.TF_TABLE = accountConfig.tf_table
-        //             env.TF_VAR_aws_ssl_certificate_arn = accountConfig.ssl_certificate_arn
-        //             env.TF_VAR_aws_route53_zone_id = accountConfig.route53_zone_id
-        //             env.TF_VAR_aws_domain = accountConfig.domain
-        //             env.TF_VAR_aws_subdomain = "${ params.Subdomain }"
-        //             env.TF_VAR_aws_ecr_image_tag = IMAGE_TAG
-        //             env.XACNT_ROLE = accountConfig.cross_account_role
-        //             env.TF_VAR_execution_role = accountConfig.execution_role
-        //             env.TF_VAR_task_role = accountConfig.task_role
-        //         }
-        //         echo "Environment Variables Set"
-
-        //         script {
-        //             dir('deploy/docker') {
-        //                 try {
-        //                     terraformInit()
-        //                     sh 'terraform state show aws_ecr_repository.ecr'
-        //                     sh 'terraform output -raw ecr_repository_url'
-        //                     env.ECR_REPOSITORY_URL = sh(script: 'terraform output -raw ecr_repository_url', returnStdout: true).trim()
-        //                 } catch (Exception e) {
-        //                     echo "ECR Repository not yet created, skipping..."
-        //                 }
-        //             }
-        //         }
-
-        //         script {
-        //             echo "App Name: ${env.TF_VAR_app_name}"
-        //             echo "Account ID: ${env.TF_VAR_aws_account_id}"
-        //             echo "AWS Region: ${env.TF_VAR_aws_region}"
         //             echo "Security Group: ${env.TF_VAR_aws_security_group}"
         //             echo "Subnet IDs: ${env.TF_VAR_aws_subnet_ids}"
         //             echo "VPC ID: ${env.TF_VAR_aws_vpc_id}"
@@ -110,182 +137,145 @@ pipeline {
         //             echo "Route53 Zone ID: ${env.TF_VAR_aws_route53_zone_id}"
         //             echo "Domain: ${env.TF_VAR_aws_domain}"
         //             echo "Subdomain: ${env.TF_VAR_aws_subdomain}"
-        //             echo "Image Tag: ${env.TF_VAR_aws_ecr_image_tag}"
-        //             echo "Cross Account Role: ${env.XACNT_ROLE}"
-        //             echo "Execution Role: ${env.TF_VAR_execution_role}"
-        //             echo "Task Role: ${env.TF_VAR_task_role}"
         //             echo "ECR Repository URL: ${env.ECR_REPOSITORY_URL ?: 'ECR Repository not yet created'}"
         //         }
         //     }
         // }
 
-        // stage('AssumeRole') {
-        //     steps {
-        //         script {
-        //             def assumeRoleCmd = """
-        //                 aws sts assume-role --role-arn arn:aws:iam::${env.TF_VAR_aws_account_id}:role/${XACNT_ROLE} --role-session-name CrossAccountSession
-        //             """
-        //             def assumeRoleOutput = sh(script: assumeRoleCmd, returnStdout: true).trim()
-        //             def creds = readJSON(text: assumeRoleOutput).Credentials
+        stage('Destroy Infrastructure') {
+            when {
+                expression { params.Options == 'Deploy' || params.Options == 'Destroy' }
+            }
+            steps {
+                script{
+                    dir('deploy/docker') {
+                        terraformInit()
+                        try {
+                            sh 'terraform destroy -auto-approve || echo "No existing infrastructure to destroy."'
+                        } catch (Exception e) {
+                            echo "Terraform destroy failed: ${e}"
+                            echo "Exiting due to Terraform destroy failure"
+                        }
+                    }
+                }
+            }
+        }
 
-        //             env.AWS_ACCESS_KEY_ID = creds.AccessKeyId
-        //             env.AWS_SECRET_ACCESS_KEY = creds.SecretAccessKey
-        //             env.AWS_SESSION_TOKEN = creds.SessionToken
-        //         }
-        //     }
-        // }
+        stage('Destroy ECR Repository') {
+            when {
+                expression { params.Options == 'DestroyECR' }
+            }
+            steps {
+                script {
+                    dir('deploy/docker') {
+                        terraformInit()
+                        try {
+                            echo "Deleting Repository URL: ${ECR_REPOSITORY_URL}"
+                            sh 'aws ecr delete-repository --repository-name ${ECR_REPOSITORY_URL} --force'
+                            echo "ECR Repository Deleted ${ECR_REPOSITORY_URL}"
+                        } catch (Exception e) {
+                            echo "Terraform destroy failed: ${e}"
+                            echo "Exiting due to Terraform destroy failure"
+                        }
+                    }
+                }
+            }
+        }
 
-        // // stage('Test Environment Variables') {
-        // //     steps {
-        // //         script {
-        // //             echo "Security Group: ${env.TF_VAR_aws_security_group}"
-        // //             echo "Subnet IDs: ${env.TF_VAR_aws_subnet_ids}"
-        // //             echo "VPC ID: ${env.TF_VAR_aws_vpc_id}"
-        // //             echo "Terraform Bucket: ${env.TF_BUCKET}"
-        // //             echo "Terraform Table: ${env.TF_TABLE}"
-        // //             echo "SSL Certificate ARN: ${env.TF_VAR_aws_ssl_certificate_arn}"
-        // //             echo "Route53 Zone ID: ${env.TF_VAR_aws_route53_zone_id}"
-        // //             echo "Domain: ${env.TF_VAR_aws_domain}"
-        // //             echo "Subdomain: ${env.TF_VAR_aws_subdomain}"
-        // //             echo "ECR Repository URL: ${env.ECR_REPOSITORY_URL ?: 'ECR Repository not yet created'}"
-        // //         }
-        // //     }
-        // // }
+        stage('Deploy ECR Repository') {
+            when {
+                expression { (params.Options == 'Deploy' || params.Options == 'Update') && (env.ECR_REPOSITORY_URL == null || env.ECR_REPOSITORY_URL == '') }
+            }
+            steps {
+                script {
+                    dir('deploy/docker') {
+                        terraformInit()
+                        try {
+                            sh 'terraform plan -out=ecr.tfplan -target=aws_ecr_repository.ecr'
+                            sh 'terraform apply -auto-approve ecr.tfplan'
+                            env.ECR_REPOSITORY_URL = sh(script: 'terraform output -raw ecr_repository_url', returnStdout: true).trim()
+                            echo "ECR Repository URL: ${ECR_REPOSITORY_URL}"
+                        } catch (Exception e) {
+                            echo "Terraform apply failed: ${e}"
+                            echo "Rolling back changes"
+                            sh "terraform destroy -auto-approve"
+                            echo "Exiting due to Terraform apply failure"
+                        }
+                    }
+                }
+            }
+        }
 
-        // stage('Destroy Infrastructure') {
-        //     when {
-        //         expression { params.Options == 'Deploy' || params.Options == 'Destroy' }
-        //     }
-        //     steps {
-        //         script{
-        //             dir('deploy/docker') {
-        //                 terraformInit()
-        //                 try {
-        //                     sh 'terraform destroy -auto-approve || echo "No existing infrastructure to destroy."'
-        //                 } catch (Exception e) {
-        //                     echo "Terraform destroy failed: ${e}"
-        //                     echo "Exiting due to Terraform destroy failure"
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        // Per application basis; Run only when additional configuration is needed
+        stage('Run Application Scripts') {
+            when {
+                expression { params.Options == 'Deploy' || params.Options == 'Update' }
+            }
+            steps {
+                script {
+                    try {
+                        dir('deploy/scripts') {
+                            if (fileExists('*.sh')) {
+                                echo "Running bash scripts"
+                                sh 'chmod +x *.sh'
+                                sh './*.sh'
+                            } else {
+                                echo "No bash scripts found"
+                            }
 
-        // stage('Destroy ECR Repository') {
-        //     when {
-        //         expression { params.Options == 'DestroyECR' }
-        //     }
-        //     steps {
-        //         script {
-        //             dir('deploy/docker') {
-        //                 terraformInit()
-        //                 try {
-        //                     echo "Deleting Repository URL: ${ECR_REPOSITORY_URL}"
-        //                     sh 'aws ecr delete-repository --repository-name ${ECR_REPOSITORY_URL} --force'
-        //                     echo "ECR Repository Deleted ${ECR_REPOSITORY_URL}"
-        //                 } catch (Exception e) {
-        //                     echo "Terraform destroy failed: ${e}"
-        //                     echo "Exiting due to Terraform destroy failure"
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                            if (fileExists('*.py')) {
+                                echo "Running python scripts"
+                                sh 'python3 ./*.py'
+                            } else {
+                                echo "No python scripts found"
+                            }
+                        }
+                    } catch (Exception e) {
+                        echo "Application scripts failed or no scripts found: ${e}"
+                        echo "Exiting due to application scripts failure"
+                    }
+                }
+            }
+        }
 
-        // stage('Deploy ECR Repository') {
-        //     when {
-        //         expression { (params.Options == 'Deploy' || params.Options == 'Update') && (env.ECR_REPOSITORY_URL == null || env.ECR_REPOSITORY_URL == '') }
-        //     }
-        //     steps {
-        //         script {
-        //             dir('deploy/docker') {
-        //                 terraformInit()
-        //                 try {
-        //                     sh 'terraform plan -out=ecr.tfplan -target=aws_ecr_repository.ecr'
-        //                     sh 'terraform apply -auto-approve ecr.tfplan'
-        //                     env.ECR_REPOSITORY_URL = sh(script: 'terraform output -raw ecr_repository_url', returnStdout: true).trim()
-        //                     echo "ECR Repository URL: ${ECR_REPOSITORY_URL}"
-        //                 } catch (Exception e) {
-        //                     echo "Terraform apply failed: ${e}"
-        //                     echo "Rolling back changes"
-        //                     sh "terraform destroy -auto-approve"
-        //                     echo "Exiting due to Terraform apply failure"
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Build Docker Image') {
+            when {
+                expression { params.Options == 'Deploy' || params.Options == 'Update'  }
+            }
+            steps {
+                script {
+                    sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${TF_VAR_aws_account_id}.dkr.ecr.${TF_VAR_aws_region}.amazonaws.com'
+                    sh 'docker build -t ${TF_VAR_app_name}:${TF_VAR_aws_ecr_image_tag} .'
+                }
+            }
+        }
 
-        // // Per application basis; Run only when additional configuration is needed
-        // stage('Run Application Scripts') {
-        //     when {
-        //         expression { params.Options == 'Deploy' || params.Options == 'Update' }
-        //     }
-        //     steps {
-        //         script {
-        //             try {
-        //                 dir('deploy/scripts') {
-        //                     if (fileExists('*.sh')) {
-        //                         echo "Running bash scripts"
-        //                         sh 'chmod +x *.sh'
-        //                         sh './*.sh'
-        //                     } else {
-        //                         echo "No bash scripts found"
-        //                     }
+        stage('Push Docker Image') {
+            when {
+                expression { params.Options == 'Deploy' || params.Options == 'Update'  }
+            }
+            steps {
+                script {
+                    sh "docker tag ${TF_VAR_app_name}:${TF_VAR_aws_ecr_image_tag} ${ECR_REPOSITORY_URL}:${TF_VAR_aws_ecr_image_tag}"
+                    sh "docker push ${ECR_REPOSITORY_URL}:${TF_VAR_aws_ecr_image_tag}"
+                }
+            }
+        }
 
-        //                     if (fileExists('*.py')) {
-        //                         echo "Running python scripts"
-        //                         sh 'python3 ./*.py'
-        //                     } else {
-        //                         echo "No python scripts found"
-        //                     }
-        //                 }
-        //             } catch (Exception e) {
-        //                 echo "Application scripts failed or no scripts found: ${e}"
-        //                 echo "Exiting due to application scripts failure"
-        //             }
-        //         }
-        //     }
-        // }
-
-        // stage('Build Docker Image') {
-        //     when {
-        //         expression { params.Options == 'Deploy' || params.Options == 'Update'  }
-        //     }
-        //     steps {
-        //         script {
-        //             sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${TF_VAR_aws_account_id}.dkr.ecr.${TF_VAR_aws_region}.amazonaws.com'
-        //             sh 'docker build -t ${TF_VAR_app_name}:${TF_VAR_aws_ecr_image_tag} .'
-        //         }
-        //     }
-        // }
-
-        // stage('Push Docker Image') {
-        //     when {
-        //         expression { params.Options == 'Deploy' || params.Options == 'Update'  }
-        //     }
-        //     steps {
-        //         script {
-        //             sh "docker tag ${TF_VAR_app_name}:${TF_VAR_aws_ecr_image_tag} ${ECR_REPOSITORY_URL}:${TF_VAR_aws_ecr_image_tag}"
-        //             sh "docker push ${ECR_REPOSITORY_URL}:${TF_VAR_aws_ecr_image_tag}"
-        //         }
-        //     }
-        // }
-
-        // stage('Deploy Infrastructure') {
-        //     when {
-        //         expression { params.Options == 'Deploy' || params.Options == 'Update' }
-        //     }
-        //     steps {
-        //         script {
-        //             dir('deploy/docker') {
-        //                 terraformInit()
-        //                 sh "terraform plan -out=ecs-update.tfplan -var 'aws_ecr_image=${ECR_REPOSITORY_URL}:${env.TF_VAR_aws_ecr_image_tag}'"
-        //                 sh "terraform apply -auto-approve ecs-update.tfplan"
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Deploy Infrastructure') {
+            when {
+                expression { params.Options == 'Deploy' || params.Options == 'Update' }
+            }
+            steps {
+                script {
+                    dir('deploy/docker') {
+                        terraformInit()
+                        sh "terraform plan -out=ecs-update.tfplan -var 'aws_ecr_image=${ECR_REPOSITORY_URL}:${env.TF_VAR_aws_ecr_image_tag}'"
+                        sh "terraform apply -auto-approve ecs-update.tfplan"
+                    }
+                }
+            }
+        }
 
     }
 
