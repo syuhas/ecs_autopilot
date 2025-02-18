@@ -8,7 +8,7 @@ pipeline {
         AWS_ACCOUNT_ID = "${ params.Account }"
         IMAGE_TAG = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         // APP_NAME = "${ params.ApplicationName }"
-        REPOSITORY = "${ params.Repository }"
+        REPOSITORY = "${ params.Repository.split(',')[1] }"
         BRANCH = "${ params.Branch }"
     }
 
@@ -17,9 +17,8 @@ pipeline {
             steps {
                 script {
                     sh """
-                        $REPO = ${REPOSITORY.tokenize(',')[1].trim().replace(']', '').trim()}
-                        echo "Repository: ${REPO}"
-                        // echo "Branch: ${BRANCH}"
+                        echo "Cloning repository: ${REPOSITORY}"
+                        echo "Branch: ${BRANCH}"
                     """
                     // sh """
                     //     rm -r application_files && mkdir application_files
