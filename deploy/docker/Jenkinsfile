@@ -213,7 +213,7 @@ pipeline {
         // Per application basis; Run only when additional configuration is needed
         stage('Run Application Scripts') {
             when {
-                expression { params.Options == 'Deploy' || params.Options == 'Update' }
+                expression { params.Options == 'Deploy' || params.Options == 'Update' || params.Options == 'Test'}
             }
             steps {
                 script {
