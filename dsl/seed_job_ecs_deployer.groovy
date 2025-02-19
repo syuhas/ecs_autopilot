@@ -12,8 +12,7 @@ pipelineJob('test_ecs-deployer') {
                 groovyScript {
                     script("""
                         import groovy.json.JsonSlurper
-                        def jenkinsHome = System.getenv("JENKINS_HOME")
-                        def jsonFile = new File("${jenkinsHome}/github/github_branches.json")
+                        def jsonFile = new File(System.getenv('JENKINS_HOME') + "/github/github_branches.json")
                         if (!jsonFile.exists()) {
                             return ["No Repositories Found"]
                         }
@@ -39,8 +38,7 @@ pipelineJob('test_ecs-deployer') {
                 groovyScript {
                     script("""
                         import groovy.json.JsonSlurper
-                        def jenkinsHome = System.getenv("JENKINS_HOME")
-                        def jsonFile = new File("${jenkinsHome}/github/github_branches.json")
+                        def jsonFile = new File(System.getenv('JENKINS_HOME') + "/github/github_branches.json")
                         if (!jsonFile.exists()) {
                             return ["No Branches Found"]
                         }
@@ -70,7 +68,7 @@ pipelineJob('test_ecs-deployer') {
                 groovyScript {
                     script("""
                         import groovy.json.JsonSlurper
-                        def filePath = "/home/jenkins_home/workspace/fetch_subdomains/subdomains.json"
+                        def filePath = System.getenv('JENKINS_HOME') + "/workspace/fetch_subdomains/subdomain.json"
                         def subdomainsList = []
                         if (new File(filePath).exists()) {
                             def jsonText = new File(filePath).text
