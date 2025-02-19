@@ -1,7 +1,3 @@
-// @Library('pipeline-library') _  // Use Shared Libraries if available
-
-// import groovy.yaml.YamlSlurper
-
 pipeline {
     agent any
     environment {
@@ -129,23 +125,6 @@ pipeline {
             }
         }
 
-        // stage('Test Environment Variables') {
-        //     steps {
-        //         script {
-        //             echo "Security Group: ${env.TF_VAR_aws_security_group}"
-        //             echo "Subnet IDs: ${env.TF_VAR_aws_subnet_ids}"
-        //             echo "VPC ID: ${env.TF_VAR_aws_vpc_id}"
-        //             echo "Terraform Bucket: ${env.TF_BUCKET}"
-        //             echo "Terraform Table: ${env.TF_TABLE}"
-        //             echo "SSL Certificate ARN: ${env.TF_VAR_aws_ssl_certificate_arn}"
-        //             echo "Route53 Zone ID: ${env.TF_VAR_aws_route53_zone_id}"
-        //             echo "Domain: ${env.TF_VAR_aws_domain}"
-        //             echo "Subdomain: ${env.TF_VAR_aws_subdomain}"
-        //             echo "ECR Repository URL: ${env.ECR_REPOSITORY_URL ?: 'ECR Repository not yet created'}"
-        //         }
-        //     }
-        // }
-
         stage('Destroy Infrastructure') {
             when {
                 expression { params.Options == 'Deploy' || params.Options == 'Destroy' }
@@ -165,26 +144,26 @@ pipeline {
             }
         }
 
-        stage('Destroy ECR Repository') {
-            when {
-                expression { params.Options == 'DestroyECR' }
-            }
-            steps {
-                script {
-                    dir('deploy/docker') {
-                        terraformInit()
-                        try {
-                            echo "Deleting Repository URL: ${ECR_REPOSITORY_URL}"
-                            sh 'aws ecr delete-repository --repository-name ${ECR_REPOSITORY_URL} --force'
-                            echo "ECR Repository Deleted ${ECR_REPOSITORY_URL}"
-                        } catch (Exception e) {
-                            echo "Terraform destroy failed: ${e}"
-                            echo "Exiting due to Terraform destroy failure"
-                        }
-                    }
-                }
-            }
-        }
+        // stage('Destroy ECR Repository') {
+        //     when {
+        //         expression { params.Options == 'DestroyECR' }
+        //     }
+        //     steps {
+        //         script {
+        //             dir('deploy/docker') {
+        //                 terraformInit()
+        //                 try {
+        //                     echo "Deleting Repository URL: ${ECR_REPOSITORY_URL}"
+        //                     sh 'aws ecr delete-repository --repository-name ${ECR_REPOSITORY_URL} --force'
+        //                     echo "ECR Repository Deleted ${ECR_REPOSITORY_URL}"
+        //                 } catch (Exception e) {
+        //                     echo "Terraform destroy failed: ${e}"
+        //                     echo "Exiting due to Terraform destroy failure"
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Deploy ECR Repository') {
             when {
@@ -219,7 +198,7 @@ pipeline {
                 script {
                     try {
                         dir('deploy/scripts') {
-                            // Find all .sh files
+                            // Optional bash scripts will run here
                             def bashScripts = findFiles(glob: '*.sh')
                             if (bashScripts.length > 0) {
                                 echo "Running bash scripts"
@@ -231,7 +210,7 @@ pipeline {
                                 echo "No bash scripts found"
                             }
 
-                            // Find all .py files
+                            // Optional python scripts will run here - be sure to include dependencies via requirements.txt
                             def pythonScripts = findFiles(glob: '*.py')
                             if (pythonScripts.length > 0) {
                                 echo "Running python scripts"
