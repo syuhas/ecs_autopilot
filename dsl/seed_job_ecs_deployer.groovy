@@ -40,7 +40,7 @@ pipelineJob('test_ecs-deployer') {
             }
         }
 
-        choiceParam('Options', ['Deploy', 'Update', 'Destroy', 'DestroyECR', 'Test'], 'Select an operation.')
+        choiceParam('Options', ['Deploy', 'Update', 'Destroy', 'Test'], 'Select an operation.')
         choiceParam('Account', ['551796573889', '061039789243'], 'Select an AWS account.')
         stringParam('Subdomain', 'test', 'Subdomain to deploy (eg. php = php.example.net or php.dev.example.net).')
 
