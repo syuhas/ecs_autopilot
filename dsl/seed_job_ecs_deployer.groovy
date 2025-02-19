@@ -1,4 +1,4 @@
-pipelineJob('deploy-repos') {
+pipelineJob('ecs-deployer') {
     description('Pipeline job to deploy repositories with Active Choice Parameters.')
 
     // General configurations
