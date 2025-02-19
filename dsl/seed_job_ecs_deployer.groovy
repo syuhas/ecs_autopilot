@@ -17,7 +17,7 @@ pipelineJob('test_ecs-deployer') {
                     def jsonContent = new JsonSlurper().parseText(jsonFile.text)
                     return jsonContent.keySet().toList()
                 ''')
-                sandbox(false)
+                sandbox()
             }
         }
 
@@ -38,7 +38,7 @@ pipelineJob('test_ecs-deployer') {
                     return branches
 
                 ''')
-                sandbox(false)
+                sandbox()
             }
         }
 
@@ -64,7 +64,7 @@ pipelineJob('test_ecs-deployer') {
                         return subdomainsList
                     }
                 ''')
-                sandbox(false)
+                sandbox()
             }
         }
     }
