@@ -29,9 +29,9 @@ job('fetch_repos') {
     // Build Steps - Run the shell script
     steps {
         shell('''
-            #!/bin/bash
-            chmod +x deploy/fetch_jobs/repos.sh
-            ./deploy/fetch_jobs/repos.sh
+#!/bin/bash
+chmod +x deploy/fetch_jobs/repos.sh
+./deploy/fetch_jobs/repos.sh
         ''')
     }
 }

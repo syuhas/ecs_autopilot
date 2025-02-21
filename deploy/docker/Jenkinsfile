@@ -144,27 +144,6 @@ pipeline {
             }
         }
 
-        // stage('Destroy ECR Repository') {
-        //     when {
-        //         expression { params.Options == 'DestroyECR' }
-        //     }
-        //     steps {
-        //         script {
-        //             dir('deploy/docker') {
-        //                 terraformInit()
-        //                 try {
-        //                     echo "Deleting Repository URL: ${ECR_REPOSITORY_URL}"
-        //                     sh 'aws ecr delete-repository --repository-name ${ECR_REPOSITORY_URL} --force'
-        //                     echo "ECR Repository Deleted ${ECR_REPOSITORY_URL}"
-        //                 } catch (Exception e) {
-        //                     echo "Terraform destroy failed: ${e}"
-        //                     echo "Exiting due to Terraform destroy failure"
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
         stage('Deploy ECR Repository') {
             when {
                 expression { (params.Options == 'Deploy' || params.Options == 'Update') && (env.ECR_REPOSITORY_URL == null || env.ECR_REPOSITORY_URL == '') }

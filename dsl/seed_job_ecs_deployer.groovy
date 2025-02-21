@@ -8,14 +8,14 @@ pipelineJob('test_ecs-deployer') {
             choiceType('SINGLE_SELECT')
             groovyScript {
                 script('''
-                    import groovy.json.JsonSlurper
-                    def jenkinsHome = System.getenv("JENKINS_HOME")
-                    def jsonFile = new File("${jenkinsHome}/github/github_branches.json")
-                    if (!jsonFile.exists()) {
-                        return ["No Repositories Found"]
-                    }
-                    def jsonContent = new JsonSlurper().parseText(jsonFile.text)
-                    return jsonContent.keySet().toList()
+import groovy.json.JsonSlurper
+def jenkinsHome = System.getenv("JENKINS_HOME")
+def jsonFile = new File("${jenkinsHome}/github/github_branches.json")
+if (!jsonFile.exists()) {
+    return ["No Repositories Found"]
+}
+def jsonContent = new JsonSlurper().parseText(jsonFile.text)
+return jsonContent.keySet().toList()
                 ''')
             }
         }
@@ -26,15 +26,15 @@ pipelineJob('test_ecs-deployer') {
             referencedParameter('Repository')
             groovyScript {
                 script('''
-                    import groovy.json.JsonSlurper
-                    def jenkinsHome = System.getenv("JENKINS_HOME")
-                    def jsonFile = new File("${jenkinsHome}/github/github_branches.json")
-                    if (!jsonFile.exists()) {
-                        return ["No Branches Found"]
-                    }
-                    def jsonContent = new JsonSlurper().parseText(jsonFile.text)
-                    def branches = jsonContent[Repository] ?: ["No Branches Found"]
-                    return branches
+import groovy.json.JsonSlurper
+def jenkinsHome = System.getenv("JENKINS_HOME")
+def jsonFile = new File("${jenkinsHome}/github/github_branches.json")
+if (!jsonFile.exists()) {
+    return ["No Branches Found"]
+}
+def jsonContent = new JsonSlurper().parseText(jsonFile.text)
+def branches = jsonContent[Repository] ?: ["No Branches Found"]
+return branches
 
                 ''')
             }
@@ -49,18 +49,18 @@ pipelineJob('test_ecs-deployer') {
             choiceType('MULTI_SELECT')
             groovyScript {
                 script('''
-                    import groovy.json.JsonSlurper
-                    def filePath = "/home/jenkins_home/workspace/fetch_subdomains/subdomains.json"
-                    def subdomainsList = []
-                    if (new File(filePath).exists()) {
-                        def jsonText = new File(filePath).text
-                        subdomainsList = new JsonSlurper().parseText(jsonText)
-                    }
-                    if (subdomainsList.isEmpty()) {
-                        return ["No subdomains currently in use."]
-                    } else {
-                        return subdomainsList
-                    }
+import groovy.json.JsonSlurper
+def filePath = "/home/jenkins_home/workspace/fetch_subdomains/subdomains.json"
+def subdomainsList = []
+if (new File(filePath).exists()) {
+    def jsonText = new File(filePath).text
+    subdomainsList = new JsonSlurper().parseText(jsonText)
+}
+if (subdomainsList.isEmpty()) {
+    return ["No subdomains currently in use."]
+} else {
+    return subdomainsList
+}
                 ''')
             }
         }

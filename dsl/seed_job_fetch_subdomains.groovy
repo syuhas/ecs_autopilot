@@ -29,9 +29,9 @@ job('fetch_subdomains') {
     // Build Steps - Run the shell script
     steps {
         shell('''
-            #!/bin/bash
-            chmod +x deploy/fetch_jobs/subdomains.sh
-            ./deploy/fetch_jobs/subdomains.sh
+#!/bin/bash
+chmod +x deploy/fetch_jobs/subdomains.sh
+./deploy/fetch_jobs/subdomains.sh
         ''')
     }
 }
