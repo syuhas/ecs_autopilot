@@ -1,0 +1,17 @@
+app_name: myapp
+aws_accounts:
+  '439234234':
+    cross_account_role: asdkjh
+    domain: google.com
+    execution_role: s;alkdjh
+    route53_zone_id: zlsdfjhkg
+    security_group: sg-1
+    ssl_certificate_arn: asdkhjf
+    subnet_ids:
+    - subnet-324123
+    - subnet-239487
+    task_role: asdlkjh
+    tf_bucket: bucket1
+    tf_table: bucket2
+    vpc_id: vpc-123
+region: asdasd

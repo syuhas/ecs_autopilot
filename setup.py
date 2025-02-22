@@ -6,11 +6,15 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'yaml=config_cli.generate_config_yaml:app'
+            'config_ui=config.generate_config:main',
+            'config=config.generate_config_yaml:app'
         ]
     },
     install_requires=[
-        'typer'
+        'typer',
+        'pyyaml',
+        'textual-dev',
+        'loguru'
     ],
     extras_require={
         'dev': ['pytest', 'pytest-cov']

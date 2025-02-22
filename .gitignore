@@ -3,3 +3,5 @@ venv
 *.egg
 *.pyc
 temp*
+**/__pycache__
+**/*.pyc

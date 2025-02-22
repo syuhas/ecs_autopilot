@@ -3,6 +3,7 @@ import json
 import os
 import re
 from loguru import logger
+import yaml
 
 # list all subdomains ending in domain 'digitalsteve.net' for all accounts in the list
 workspace = os.environ['WORKSPACE']
@@ -41,14 +42,17 @@ def get_subdomains(session):
             for page in paginator.paginate(HostedZoneId=hosted_zone_id):
                 for record_set in page['ResourceRecordSets']:
                     if record_set['Type'] == 'A':
-                        trimmed_name = record_set['Name'][:-1]
+                        # trimmed_name = record_set['Name'][:-1]
                         identity = session.client('sts').get_caller_identity()
-                        regex = re.compile(r'^((?!digitalsteve\.)[^.]+\.)+(?=digitalsteve\.net$)')
-                        match = regex.search(trimmed_name)
-                        if match:
-                            trimmed_subdomain = match.group()[:-1]
-                            logger.info(f'{trimmed_subdomain} ({trimmed_name}) ({identity["Account"]})')
-                            domains.append(f'{trimmed_subdomain} ({trimmed_name}) ({identity["Account"]})')
+                        # regex = re.compile(r'^((?!digitalsteve\.)[^.]+\.)+(?=digitalsteve\.net$)')
+                        # match = regex.search(trimmed_name)
+                        # if match:
+                        #     trimmed_subdomain = match.group()[:-1]
+                        #     logger.info(f'{trimmed_subdomain} ({trimmed_name}) ({identity["Account"]})')
+                        #     domains.append(f'{trimmed_subdomain} ({trimmed_name}) ({identity["Account"]})')
+                        name = record_set['Name']
+                        domains.append(f'{name} ({identity["Account"]})')
+                        
                         
     return domains
                         
