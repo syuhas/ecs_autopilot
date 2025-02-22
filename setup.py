@@ -6,8 +6,8 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'config_ui=config.generate_config:main',
-            'config=config.generate_config_yaml:app'
+            'config_ui=config.generate_config_ui:main',
+            'config=config.generate_config:app'
         ]
     },
     install_requires=[

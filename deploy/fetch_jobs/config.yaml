@@ -1,0 +1,31 @@
+region: "us-east-1"
+app_name: "s3dashboard"
+aws_accounts:
+  "551796573889":
+    security_group: sg-00d9ca388301c93a9
+    subnet_ids:
+    - subnet-0823df6c43b1a0ea4
+    - subnet-057dcb202796ed034
+    vpc_id: vpc-0fb8abe9d3c477bd0
+    tf_bucket: terraform-lock-bucket
+    tf_table: terraform-lock-table
+    ssl_certificate_arn: arn:aws:acm:us-east-1:551796573889:certificate/a96258a9-2996-4186-b5a8-815bf9c5b3e1
+    route53_zone_id: "Z02299283BLAIJGG9JHMK"
+    domain: "digitalsteve.net"
+    cross_account_role: "jenkinsAdminXacnt"
+    execution_role: "ecsTaskExecutionRole"
+    task_role: "admin"
+  "061039789243":
+    security_group: "sg-037b895bfb55fcedd"
+    subnet_ids:
+    - "subnet-0779315ccd9641510"
+    - "subnet-0e8054e0ff2fef1d8"
+    vpc_id: "vpc-04ad271ca687b3562"
+    tf_bucket: "terraform-lock-bucket-dev"
+    tf_table: "terraform-lock-table"
+    ssl_certificate_arn: "arn:aws:acm:us-east-1:061039789243:certificate/0f0c9829-728a-48d3-aa01-afd1637ad61a"
+    route53_zone_id: "Z067106723AVOCD6QFWVC"
+    domain: "dev.digitalsteve.net"
+    cross_account_role: "jenkinsAdminXacnt"
+    execution_role: "ecsTaskExecutionRole"
+    task_role: "admin"

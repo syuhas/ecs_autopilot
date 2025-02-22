@@ -1,7 +1,6 @@
 pipelineJob('test_ecs-deployer') {
     description('Pipeline job to deploy repositories with Active Choice Parameters.')
 
-    // General configurations
     parameters {
         activeChoiceParam('Repository') {
             description('Select a repository.')
@@ -41,8 +40,9 @@ return branches
         }
 
         choiceParam('Options', ['Deploy', 'Update', 'Destroy', 'Test'], 'Select an operation.')
+        // update with your own AWS account numbers
         choiceParam('Account', ['551796573889', '061039789243'], 'Select an AWS account.')
-        stringParam('Subdomain', 'test', 'Subdomain to deploy (eg. php = php.example.net or php.dev.example.net).')
+        stringParam('Subdomain', 'myapp', 'Subdomain to deploy (eg. php = php.example.net or php.dev.example.net).')
 
         activeChoiceParam('Subdomains Currently In Use') {
             description('Displays currently used subdomains.')
@@ -71,6 +71,7 @@ if (subdomainsList.isEmpty()) {
             scm {
                 git {
                     remote {
+                        // update with your own repository
                         url('https://github.com/syuhas/ecs_deployer')
                     }
                     branch('*/main')

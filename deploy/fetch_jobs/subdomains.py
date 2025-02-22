@@ -4,23 +4,40 @@ import os
 import re
 from loguru import logger
 import yaml
+import json
 
-# list all subdomains ending in domain 'digitalsteve.net' for all accounts in the list
-workspace = os.environ['WORKSPACE']
-jenkins_home = os.environ['JENKINS_HOME']
-file_path = os.path.join(workspace, 'subdomains.json')
-# add role name here. role should have the same name in all accounts and should have the same permissions
-cross_account_role = 'jenkinsAdminXacnt'
-# add your accounts here
-accounts = [
-    "551796573889",
-    "061039789243"
-]
+accounts = []
+# jenkins_home = os.environ['JENKINS_HOME']
+jenkins_home = 'deploy/fetch_jobs'
+
+
+# put the account info manually or drop the generated config.yaml file in the fetch_jobs directory
+if not os.path.exists('deploy/fetch_jobs/config.yaml'):
+    logger.info('config.yaml file not found')
+    logger.info('Using manual account info...')
+    accounts = [
+        {
+            'account_id': '551796573889',
+            'cross_account_role': 'jenkinsAdminXacnt'
+        },
+        {
+            'account_id': '061039789243',
+            'cross_account_role': 'jenkinsAdminXacnt'
+        }    
+    ]
+else:
+    with open('deploy/fetch_jobs/config.yaml', 'r') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+    for acct in config.get('aws_accounts'):
+        account_dict = {}
+        account_dict['account_id'] = acct
+        account_dict['cross_account_role'] = config.get('aws_accounts')[acct].get('cross_account_role')
+        accounts.append(account_dict)
 
 def assume_role_session(account):
     sts_client = boto3.client('sts')
     assumed_role = sts_client.assume_role(
-        RoleArn=f"arn:aws:iam::{account}:role/jenkinsAdminXacnt",
+        RoleArn=f"arn:aws:iam::{account['account_id']}:role/{account['cross_account_role']}",
         RoleSessionName="XacntAssumeRoleSession"
     )
     credentials = assumed_role['Credentials']
@@ -42,14 +59,7 @@ def get_subdomains(session):
             for page in paginator.paginate(HostedZoneId=hosted_zone_id):
                 for record_set in page['ResourceRecordSets']:
                     if record_set['Type'] == 'A':
-                        # trimmed_name = record_set['Name'][:-1]
                         identity = session.client('sts').get_caller_identity()
-                        # regex = re.compile(r'^((?!digitalsteve\.)[^.]+\.)+(?=digitalsteve\.net$)')
-                        # match = regex.search(trimmed_name)
-                        # if match:
-                        #     trimmed_subdomain = match.group()[:-1]
-                        #     logger.info(f'{trimmed_subdomain} ({trimmed_name}) ({identity["Account"]})')
-                        #     domains.append(f'{trimmed_subdomain} ({trimmed_name}) ({identity["Account"]})')
                         name = record_set['Name']
                         domains.append(f'{name} ({identity["Account"]})')
                         
@@ -63,13 +73,6 @@ for account in accounts:
     session = assume_role_session(account)
     subdomains += get_subdomains(session)
 
-
-# write subdomains to a json file
-
-with open(file_path, 'w') as f:
-    json.dump(subdomains, f)
-
-print(f"Subdomains saved to: {file_path}")
     
 # make the github directory if it doesnt exist
 os.makedirs(f'{jenkins_home}/github', exist_ok=True)
@@ -77,4 +80,4 @@ os.makedirs(f'{jenkins_home}/github', exist_ok=True)
 with open(f'{jenkins_home}/github/subdomains.json', 'w') as f:
     json.dump(subdomains, f)
     
-print(f"Subdomains saved to: /home/jenkins_home/github/subdomains.json")
+logger.info(f"Subdomains saved to: /home/jenkins_home/github/subdomains.json")
