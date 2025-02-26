@@ -5,35 +5,86 @@ from loguru import logger
 
 
 app = Typer()
+def print_logo():
+    logo = """
+ _______________________________________________________________________
+|\                                                                       \\
+| |***********************************************************************|
+| |*                                                                     *|
+| |*         ./^$$$$        ./^$$   $$  .|^$$$$$$$$     ./^$$$           *|
+| |*        ./ $$  $$       .| $$   $$   .\   $$      ./ $$   $$         *|
+| |*       ./ $$    $$      .| $$   $$     .| $$     .| $$     $$        *|
+| |*      ./ $$$$$$$$$$     .| $$   $$     .| $$     .| $$     $$        *|
+| |*     ./ $$$      $$$    .| $$   $$     .| $$      .\ $$   $$         *|
+| |*    ./ $$$        $$$   .| $$$$$$$     .| $$       .\  $$$           *|
+| |*   .|___/       /__/    .|_______|     .|___/       .\__/            *|
+| |*                                                                     *|
+| |*  .|^$$$$$$$$$    .|^$$     .|^$$         ./^$$$      .|^$$$$$$$$    *|
+| |*  .| $$      $$   .| $$     .| $$       ./ $$   $$     .\   $$       *|
+| |*  .| $$      $$   .| $$     .| $$      .| $$     $$      .| $$       *|
+| |*  .| $$$$$$$$$    .| $$     .| $$      .| $$     $$      .| $$       *|
+| |*  .| $$           .| $$     .| $$       .\ $$   $$       .| $$       *|
+| |*  .| $$           .| $$     .| $$$$$$$   .\  $$$         .| $$       *|
+| |*  .|__/           .|__/     .|______|     .\__/          .|___/      *|
+| |*                                                                     *|
+| |*                   +---------------------------+                     *|
+| |*                   |                           |                     *|
+| |*                   |          __|__            |                     *|
+| |*                   |    ----@--(_)--@----      |                     *|
+| |*                   |                           |                     *|
+| |*                   |          Yaml             |                     *|
+| |*                   |         Config            |                     *|
+| |*                   |        Generator          |                     *|
+| |*                   +---------------------------+                     *|
+ \|_______________________________________________________________________|           
+            """                                  
+    print(logo)
+
+#     """
+#     print(logo)
+
 @app.command()
 def config(accounts_num: Annotated[int, Argument(help="Number of accounts")] = 1):
     print('\n')
+    print_logo()
     if accounts_num < 1 or accounts_num > 10:
         raise Exception('Please enter between 1-10 accounts')
     if accounts_num == 1:
-        print(f'Generating config.yaml for {accounts_num} account...')
+        print('', '_'*73, '')
+        print('|', ' '*71, '|')
+        print(f"|                 Generating 'config.yaml' for {accounts_num} account...               |")
+        print('|', ' '*71, '|')
+        print('|_________________________________________________________________________|')
     else:
-        print(f'Generating config.yaml for {accounts_num} accounts...')
+        print('', '_'*73, '')
+        print('|', ' '*71, '|')
+        print(f"|                 Generating 'config.yaml' for {accounts_num} accounts...              |")
+        print('|', ' '*71, '|')
+        print('|_________________________________________________________________________|')
     print('\n')
-    region = input('Enter the region: ')
-    app_name = input('Enter the app name: ')
+    region = input('Region: ')
+    app_name = input('Enter a name for your app: ')
     accounts = {}
     for i in range(accounts_num):
         print('\n')
-        logger.info(f'Account {i+1}')
+        print('', '_'*73, '')
+        print('|', ' '*71, '|')
+        print(f"|                    Account #{i+1} Details:                                  |")
+        print('|', ' '*71, '|')
+        print('|_________________________________________________________________________|')
         print('\n')
-        account_id = input(f'Enter the account id for account {i+1}: ')
-        security_group = input('Enter the security group: ')
-        subnet_ids = input('Enter the subnet ids(separate multiple subnets with commas): ')
-        vpc_id = input('Enter the vpc id: ')
-        tf_bucket = input('Enter the tf bucket: ')
-        tf_table = input('Enter the tf table: ')
-        ssl_certificate_arn = input('Enter the ssl certificate arn: ')
-        route53_zone_id = input('Enter the route53 zone id: ')
-        domain = input('Enter the domain: ')
-        cross_account_role = input('Enter the cross account role: ')
-        execution_role = input('Enter the execution role: ')
-        task_role = input('Enter the task role: ')
+        account_id = input(f'Account ID {i+1}: ')
+        security_group = input('Primary Security Group: ')
+        subnet_ids = input('Subnet IDs(separate multiple subnets with commas): ')
+        vpc_id = input('VPC ID: ')
+        tf_bucket = input('Terraform Lock File Bucket: ')
+        tf_table = input('Terraform Lock File DynamoDB Table: ')
+        ssl_certificate_arn = input('SSL Certificate ARN (for registered domain): ')
+        route53_zone_id = input('Route53 Zone ID(for regisered domain): ')
+        domain = input('Domain Name(eg. example.com): ')
+        cross_account_role = input('Cross Account Role Name (Only the role name; Should be uniform across accounts): ')
+        execution_role = input('ECS Task Execution Role(Should be uniform across accounts): ')
+        task_role = input('Enter the Task Role (To Enable ECSExec; Should be uniform across accounts): ')
         accounts[account_id] = {
             'security_group': security_group,
             'subnet_ids': subnet_ids.split(','),
@@ -54,7 +105,7 @@ def config(accounts_num: Annotated[int, Argument(help="Number of accounts")] = 1
         }
     with open('config.yaml', 'w') as file:
         yaml.dump(account_data, file, default_flow_style=False)
-    with open('fetch_jobs/config.yaml', 'w') as file:
+    with open('deploy/fetch_jobs/config.yaml', 'w') as file:
         yaml.dump(account_data, file, default_flow_style=False)
     print('\n')
     print('config.yaml generated successfully')
