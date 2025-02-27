@@ -1,3 +1,5 @@
+import groovy.yaml.YamlSlurper
+
 pipelineJob('test_ecs-deployer') {
     description('Pipeline job to deploy repositories with Active Choice Parameters.')
 
@@ -41,8 +43,9 @@ return branches
 
         choiceParam('Options', ['Deploy', 'Update', 'Destroy', 'Test'], 'Select an operation.')
         // update with your own AWS account numbers
-        def config = readYaml file: 'config/config.yaml'
-        def aws_accounts = config['aws_accounts']
+        def config = new File("config/config.yaml")
+        def yaml = new YamlSlurper().parse(config)
+        def aws_accounts = yaml.aws_accounts
         choiceParam('Account', aws_accounts, 'Select an AWS account.')
         stringParam('Subdomain', 'myapp', 'Subdomain to deploy (eg. php = php.example.net or php.dev.example.net).')
 
