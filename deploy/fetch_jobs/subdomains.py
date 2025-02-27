@@ -7,32 +7,7 @@ import yaml
 import json
 
 accounts = []
-# jenkins_home = os.environ['JENKINS_HOME']
-jenkins_home = 'deploy/fetch_jobs'
-
-
-# put the account info manually or drop the generated config.yaml file in the fetch_jobs directory
-if not os.path.exists('deploy/fetch_jobs/config.yaml'):
-    logger.info('config.yaml file not found')
-    logger.info('Using manual account info...')
-    accounts = [
-        {
-            'account_id': '551796573889',
-            'cross_account_role': 'jenkinsAdminXacnt'
-        },
-        {
-            'account_id': '061039789243',
-            'cross_account_role': 'jenkinsAdminXacnt'
-        }    
-    ]
-else:
-    with open('deploy/fetch_jobs/config.yaml', 'r') as file:
-        config = yaml.load(file, Loader=yaml.FullLoader)
-    for acct in config.get('aws_accounts'):
-        account_dict = {}
-        account_dict['account_id'] = acct
-        account_dict['cross_account_role'] = config.get('aws_accounts')[acct].get('cross_account_role')
-        accounts.append(account_dict)
+jenkins_home = os.environ['JENKINS_HOME']
 
 def assume_role_session(account):
     sts_client = boto3.client('sts')
@@ -65,6 +40,31 @@ def get_subdomains(session):
                         
                         
     return domains
+
+# put the account info manually or drop the generated config.yaml file in the fetch_jobs directory
+if not os.path.exists('config/config.yaml'):
+    logger.info('config.yaml file not found')
+    logger.info('Using manual account info...')
+    accounts = [
+        {
+            'account_id': '551796573889',
+            'cross_account_role': 'jenkinsAdminXacnt'
+        },
+        {
+            'account_id': '061039789243',
+            'cross_account_role': 'jenkinsAdminXacnt'
+        }    
+    ]
+else:
+    with open('config/config.yaml', 'r') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+    for acct in config.get('aws_accounts'):
+        account_dict = {}
+        account_dict['account_id'] = acct
+        account_dict['cross_account_role'] = config.get('aws_accounts')[acct].get('cross_account_role')
+        accounts.append(account_dict)
+
+
                         
     
 
@@ -80,4 +80,4 @@ os.makedirs(f'{jenkins_home}/github', exist_ok=True)
 with open(f'{jenkins_home}/github/subdomains.json', 'w') as f:
     json.dump(subdomains, f)
     
-logger.info(f"Subdomains saved to: /home/jenkins_home/github/subdomains.json")
+logger.info(f"Subdomains saved to: {jenkins_home}/github/subdomains.json")

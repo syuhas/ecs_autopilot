@@ -41,7 +41,9 @@ return branches
 
         choiceParam('Options', ['Deploy', 'Update', 'Destroy', 'Test'], 'Select an operation.')
         // update with your own AWS account numbers
-        choiceParam('Account', ['551796573889', '061039789243'], 'Select an AWS account.')
+        def config = readYaml file: 'config/config.yaml'
+        def aws_accounts = config['aws_accounts']
+        choiceParam('Account', aws_accounts, 'Select an AWS account.')
         stringParam('Subdomain', 'myapp', 'Subdomain to deploy (eg. php = php.example.net or php.dev.example.net).')
 
         activeChoiceParam('Subdomains Currently In Use') {
@@ -50,7 +52,7 @@ return branches
             groovyScript {
                 script('''
 import groovy.json.JsonSlurper
-def filePath = "/home/jenkins_home/workspace/fetch_subdomains/subdomains.json"
+def filePath = "${jenkinsHome}/github/subdomains.json"
 def subdomainsList = []
 if (new File(filePath).exists()) {
     def jsonText = new File(filePath).text

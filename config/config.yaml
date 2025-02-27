@@ -1,6 +1,7 @@
 app_name: s3dashboard
+autopilot_repo: https://github.com/syuhas/ecs_autopilot
 aws_accounts:
-  061039789243:
+  "61039789243":
     cross_account_role: jenkinsAdminXacnt
     domain: dev.digitalsteve.net
     execution_role: ecsTaskExecutionRole
@@ -14,7 +15,7 @@ aws_accounts:
     tf_bucket: terraform-lock-bucket-dev
     tf_table: terraform-lock-table
     vpc_id: vpc-04ad271ca687b3562
-  '551796573889':
+  "551796573889":
     cross_account_role: jenkinsAdminXacnt
     domain: digitalsteve.net
     execution_role: ecsTaskExecutionRole
