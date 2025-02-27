@@ -4,5 +4,5 @@ Label {
 }
 
 TextArea {
-    min-height: 2vw
+    min-height: 5vw
 }

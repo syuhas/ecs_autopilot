@@ -1,5 +1,5 @@
-job('fetch_repos') {
-    description('Freestyle job to fetch GitHub repos and list branches.')
+job('fetch_subdomains') {
+    description('Freestyle job to fetch existing subdomains in selected AWS accounts.')
 
     // Restrict the job to run only on the built-in node
     label('built-in')
@@ -8,16 +8,16 @@ job('fetch_repos') {
     scm {
         git {
             remote {
-                url('https://github.com/syuhas/ecs_autopilot.git')
+                url('{{ autopilot_repo }}.git')
             }
             branch('*/main')
         }
     }
 
     // Build Triggers - Only runs when deploy-repos is built
-    triggers {
-        upstream('deploy-repos', 'SUCCESS')
-    }
+    // triggers {
+    //     upstream('deploy-repos', 'SUCCESS')
+    // }
 
     // Inject Environment Variables using CloudBees Credentials Plugin
     wrappers {
@@ -30,8 +30,8 @@ job('fetch_repos') {
     steps {
         shell('''
 #!/bin/bash
-chmod +x deploy/fetch_jobs/repos.sh
-./deploy/fetch_jobs/repos.sh
+chmod +x deploy/fetch_jobs/subdomains.sh
+./deploy/fetch_jobs/subdomains.sh
         ''')
     }
 }

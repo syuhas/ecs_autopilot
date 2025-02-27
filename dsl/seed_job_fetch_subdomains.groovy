@@ -8,7 +8,7 @@ job('fetch_subdomains') {
     scm {
         git {
             remote {
-                url('https://github.com/syuhas/ecs_deployer.git')
+                url('https://github.com/syuhas/ecs_autopilot.git')
             }
             branch('*/main')
         }

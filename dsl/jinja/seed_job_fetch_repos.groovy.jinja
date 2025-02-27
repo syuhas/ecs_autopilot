@@ -8,7 +8,7 @@ job('fetch_repos') {
     scm {
         git {
             remote {
-                url('https://github.com/syuhas/ecs_autopilot.git')
+                url('{{ autopilot_repo }}.git')
             }
             branch('*/main')
         }

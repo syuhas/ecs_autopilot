@@ -41,7 +41,7 @@ return branches
 
         choiceParam('Options', ['Deploy', 'Update', 'Destroy', 'Test'], 'Select an operation.')
         // updates with your own AWS account numbers
-        choiceParam('Account', ['61039789243','551796573889'], 'Select an AWS account.')
+        choiceParam('Account', [{% for account in aws_accounts.keys() %}'{{ account }}'{% if not loop.last %},{% endif %}{% endfor %}], 'Select an AWS account.')
         stringParam('Subdomain', 'myapp', 'Subdomain to deploy (eg. php = php.example.net or php.dev.example.net).')
 
         activeChoiceParam('Subdomains Currently In Use') {
@@ -72,7 +72,7 @@ if (subdomainsList.isEmpty()) {
                 git {
                     remote {
                         // update with your own repository
-                        url('https://github.com/syuhas/ecs_autopilot')
+                        url('{{ autopilot_repo }}')
                     }
                     branch('*/main')
                 }

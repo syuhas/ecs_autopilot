@@ -127,6 +127,7 @@ class AccountScreen(Screen):
         account_data = {
             'region': self.app.region,
             'app_name': self.app.app_name,
+            'autopilot_repo': self.app.autopilot_repo,
             'aws_accounts': {}
         }
         for account_input in self.account_inputs:
@@ -148,8 +149,8 @@ class AccountScreen(Screen):
 
         with open('config.yaml', 'w') as file:
             yaml.dump(account_data, file, default_flow_style=False, Dumper=QuotedStringDumper)
-        with open('fetch_jobs/config.yaml', 'w') as file:
-            yaml.dump(account_data, file, default_flow_style=False)
+        with open('deploy/fetch_jobs/config.yaml', 'w') as file:
+            yaml.dump(account_data, file, default_flow_style=False, Dumper=QuotedStringDumper)
         
 
 class MyApp(App):
@@ -157,6 +158,8 @@ class MyApp(App):
     def compose(self) -> ComposeResult:
         yield Label("Please Enter Your Region:")
         yield Input(value=f"us-east-1", id="region")
+        yield Label("Please Enter Autopilot Repo URL (without '.git'):")
+        yield Input(value=f"autopilot_repo", id="autopilot_repo")
         yield Label("Please Enter Your App Name:")
         yield Input(value=f"myapp", id="app_name")
         yield Label("Please Enter Number of Accounts:")
@@ -178,6 +181,7 @@ class MyApp(App):
         self.screen.styles.background = "darkblue"
         self.screen.styles.border = ("heavy", "black")
         self.region_input = self.query_one("#region", Input)
+        self.autopilot_repo_input = self.query_one("#autopilot_repo", Input)
         self.app_name_input = self.query_one("#app_name", Input)
         self.num_accounts_input = self.query_one("#no_accounts", Input)
 
@@ -185,11 +189,13 @@ class MyApp(App):
         """Handle the button click event."""
         # Access the input value after widget rendering
         region = self.region_input.value
+        autopilot_repo = self.autopilot_repo_input.value
         app_name = self.app_name_input.value
         num_accounts = int(self.num_accounts_input.value)
 
         # Set app attributes
         self.region = region
+        self.autopilot_repo = autopilot_repo
         self.app_name = app_name
         self.num_accounts = num_accounts
 
