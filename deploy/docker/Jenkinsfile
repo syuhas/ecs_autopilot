@@ -55,15 +55,15 @@ pipeline {
         stage('Terraform Backend') {
             steps {
                 script {
-                        terraformInit = {
-                            sh """
-                                terraform init -reconfigure \
-                                    -backend-config="bucket=${env.TF_BUCKET}" \
-                                    -backend-config="key=${env.TF_VAR_aws_subdomain}.${env.TF_VAR_aws_domain}/terraform.tfstate" \
-                                    -backend-config="region=${env.TF_VAR_aws_region}" \
-                                    -backend-config="dynamodb_table=${env.TF_TABLE}"
-                            """
-                        }
+                    terraformInit = {
+                        sh """
+                            terraform init -reconfigure \
+                                -backend-config="bucket=${env.TF_BUCKET}" \
+                                -backend-config="key=${env.TF_VAR_aws_subdomain}.${env.TF_VAR_aws_domain}/terraform.tfstate" \
+                                -backend-config="region=${env.TF_VAR_aws_region}" \
+                                -backend-config="dynamodb_table=${env.TF_TABLE}"
+                        """
+                    }
                 }
             }
         }
@@ -277,10 +277,10 @@ pipeline {
 
     }
 
-    // post {
-    //     always {
-    //         echo 'Cleaning up workspace'
-    //         cleanWs()
-    //     }
-    // }
+    post {
+        always {
+            echo 'Cleaning up workspace'
+            cleanWs()
+        }
+    }
 }

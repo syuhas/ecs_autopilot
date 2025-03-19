@@ -1,4 +1,4 @@
-pipelineJob('test_ecs-deployer') {
+pipelineJob('test_ecs-AutoPilot') {
     description('Pipeline job to deploy repositories with Active Choice Parameters.')
 
     parameters {
