@@ -18,7 +18,7 @@
 - Install AutoPilot Locally and run command to generate the DSL script
 - Create the seed jobs in Jenkins and run them to create the AutoPilot pipeline and fetch jobs
 
-### 3. Run the Fetch Jobs to Pupulate the Job Parameter Dropdown
+### 3. Run the Fetch Jobs to Populate the Job Parameter Dropdown
 - Execute the Fetch Repositories & Branches job to retrieve available repositories.
 - Execute the Fetch Subdomains job to load available domains from AWS Route 53.
 
