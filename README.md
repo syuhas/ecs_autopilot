@@ -121,8 +121,8 @@ Run Each Seed job to create the main pipeline and fetch jobs.
 
 ### Fetch Repository and Subdomain Data
 Once the seed jobs are created, run the following Jenkins jobs:
-✅ Fetch Repositories & Branches – Retrieves repository and branch names from GitHub.
-✅ Fetch Subdomains – Retrieves active subdomains from AWS Route 53.
+- ✅ Fetch Repositories & Branches – Retrieves repository and branch names from GitHub.
+- ✅ Fetch Subdomains – Retrieves active subdomains from AWS Route 53.
 
 Running these will populate the Active Choice Parameters dropdown and subdomains in the main pipeline job.
 (Note: Jenkins will require script approvals before running these jobs.)
