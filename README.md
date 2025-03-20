@@ -1,6 +1,6 @@
 # ECS AutoPilot
 <p align="center">
-  <img src="https://s3.us-east-1.amazonaws.com/www.digitalsteve.net/aplogo.png" alt="Diagram">
+  <img src="https://github.com/user-attachments/assets/3afe29fe-dfa2-4da7-8794-44e6437bbaff" alt="Diagram">
 </p>
 
 
